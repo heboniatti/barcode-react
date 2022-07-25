@@ -1,25 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import Quagga from 'quagga';
 
 function App() {
+  const [barcode, setBarcode] = React.useState('');
+  const onDetected = result => {
+    Quagga.offDetected(onDetected);
+
+    let ean = result.codeResult.code;
+    setBarcode(ean);
+    Quagga.onDetected(onDetected)
+  }
+
+  useEffect(() => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      Quagga.init({
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector('#video'),
+            constraints: {
+              facingMode: "environment"
+            }
+          },
+          numOfWorkers: 1,
+          locate: true,
+          decoder: {
+            readers: ["ean_reader"],
+          },
+        },
+        err => {
+          if (err) {
+            console.log(err);
+            alert('Error loading camera');
+            return;
+          }
+          Quagga.start();
+        },
+        Quagga.onDetected(onDetected)
+      )
+    }
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <div id="video"></div>
+      <p>Barcode: {barcode}</p>
+    </>
   );
 }
 
