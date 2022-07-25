@@ -43,8 +43,8 @@ function App() {
 
   return (
     <>
-      <div id="video"></div>
       <p>Barcode: {barcode}</p>
+      <div id="video"></div>
     </>
   );
 }
